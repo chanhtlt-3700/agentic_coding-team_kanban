@@ -11,9 +11,10 @@ interface KanbanListProps {
   list: ListWithCards
   boardId: string
   onCardCreated?: (listId: string, card: any) => void
+  onCardUpdated?: () => void
 }
 
-export default function KanbanList({ list, boardId, onCardCreated }: KanbanListProps) {
+export default function KanbanList({ list, boardId, onCardCreated, onCardUpdated }: KanbanListProps) {
   const { setNodeRef } = useDroppable({
     id: list.id,
   })
@@ -41,7 +42,11 @@ export default function KanbanList({ list, boardId, onCardCreated }: KanbanListP
             strategy={verticalListSortingStrategy}
           >
             {list.cards.map((card) => (
-              <KanbanCard key={card.id} card={card} />
+              <KanbanCard 
+                key={card.id} 
+                card={card} 
+                onUpdate={onCardUpdated}
+              />
             ))}
           </SortableContext>
         </div>

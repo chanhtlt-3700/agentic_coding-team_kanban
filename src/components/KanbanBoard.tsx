@@ -133,6 +133,19 @@ export default function KanbanBoard({ board: initialBoard }: KanbanBoardProps) {
     }))
   }
 
+  const handleCardUpdated = async () => {
+    // Refetch board data to update card details (comments count, members)
+    try {
+      const response = await fetch(`/api/boards/${board.id}`)
+      if (response.ok) {
+        const updatedBoard = await response.json()
+        setBoard(updatedBoard)
+      }
+    } catch (error) {
+      console.error('Failed to refresh board:', error)
+    }
+  }
+
   return (
     <DndContext
       sensors={sensors}

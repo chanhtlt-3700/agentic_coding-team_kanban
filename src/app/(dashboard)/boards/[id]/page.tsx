@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import KanbanBoard from '@/components/KanbanBoard'
+import BoardHeader from '@/components/BoardHeader'
 
 export default async function BoardPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -56,24 +57,7 @@ export default async function BoardPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-4">
-            <Link 
-              href="/dashboard"
-              className="text-gray-600 hover:text-gray-900"
-            >
-              <ArrowLeft size={20} />
-            </Link>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900">{transformedBoard.title}</h1>
-              {transformedBoard.description && (
-                <p className="text-sm text-gray-600 mt-1">{transformedBoard.description}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <BoardHeader board={transformedBoard} />
 
       {/* Kanban Board */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

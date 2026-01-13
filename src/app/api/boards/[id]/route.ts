@@ -12,10 +12,6 @@ export async function GET(
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { data: board, error } = await supabase
@@ -83,9 +79,10 @@ export async function PUT(
     const json = await request.json()
     const body = updateBoardSchema.parse(json)
 
+    // @ts-ignore - Supabase generated types issue
     const { data: board, error } = await supabase
       .from('boards')
-      .update(body)
+      .update(body as any)
       .eq('id', id)
       .select()
       .single()
@@ -117,6 +114,11 @@ export async function DELETE(
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const { error } = await supabase
+      .from('boards')
+      .delete()
+      .eq('id', id)
 
     if (error) throw error
 
