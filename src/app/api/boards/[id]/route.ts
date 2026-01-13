@@ -1,22 +1,27 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { updateBoardSchema } from '@/lib/validations'
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { updateBoardSchema } from '@/lib/validations';
+import { error } from 'console';
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
-    const supabase = await createClient()    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { id } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { data: board, error } = await supabase
       .from('boards')
-      .select(`
+      .select(
+        `
         *,
         owner:profiles!boards_owner_id_fkey(id, name, email, avatar_url),
         lists(
@@ -30,11 +35,12 @@ export async function GET(
             comments(count)
           )
         )
-      `)
+      `
+      )
       .eq('id', id)
-      .single()
+      .single();
 
-    if (error) throw error
+    if (error) throw error;
 
     // Transform data for easier consumption
     const transformedBoard = {
@@ -51,15 +57,15 @@ export async function GET(
               comments_count: card.comments[0]?.count || 0,
             })),
         })),
-    }
+    };
 
-    return NextResponse.json({ board: transformedBoard })
+    return NextResponse.json({ board: transformedBoard });
   } catch (error) {
-    console.error('Error fetching board:', error)
+    console.error('Error fetching board:', error);
     return NextResponse.json(
       { error: 'Failed to fetch board' },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -68,37 +74,40 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
-    const supabase = await createClient()
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { id } = await params;
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const json = await request.json()
-    const body = updateBoardSchema.parse(json)
+    const json = await request.json();
+    const body = updateBoardSchema.parse(json);
 
     // @ts-ignore - Supabase generated types issue
     const { data: board, error } = await supabase
       .from('boards')
-      .update(body as any)
+      .update(body as never)
       .eq('id', id)
       .select()
-      .single()
+      .single();
 
-    if (error) throw error
+    if (error) throw error;
 
-    return NextResponse.json({ board })
+    return NextResponse.json({ board });
   } catch (error) {
-    console.error('Error updating board:', error)
+    console.error('Error updating board:', error);
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return NextResponse.json(
       { error: 'Failed to update board' },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -107,27 +116,27 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
-    const supabase = await createClient()
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { id } = await params;
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { error } = await supabase
-      .from('boards')
-      .delete()
-      .eq('id', id)
+    const { error } = await supabase.from('boards').delete().eq('id', id);
 
-    if (error) throw error
+    if (error) throw error;
 
-    return NextResponse.json({ success: true }, { status: 204 })
+    return NextResponse.json({ success: true }, { status: 204 });
   } catch (error) {
-    console.error('Error deleting board:', error)
+    console.error('Error deleting board:', error);
     return NextResponse.json(
       { error: 'Failed to delete board' },
       { status: 500 }
-    )
+    );
   }
 }

@@ -1,30 +1,40 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import CreateBoardModal from '@/components/CreateBoardModal'
-import BoardCard from '@/components/BoardCard'
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import CreateBoardModal from '@/components/CreateBoardModal';
+import BoardCard from '@/components/BoardCard';
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
-  
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
   if (authError || !user) {
-    redirect('/login')
+    redirect('/login');
   }
 
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user.id)
-    .single()
+    .single<{
+      id: string;
+      name: string | null;
+      email: string;
+      avatar_url: string | null;
+    }>();
 
   const { data: boards } = await supabase
     .from('boards')
-    .select(`
+    .select(
+      `
       *,
       owner:profiles!boards_owner_id_fkey(id, name, email, avatar_url)
-    `)
-    .order('created_at', { ascending: false })
+    `
+    )
+    .order('created_at', { ascending: false });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -65,11 +75,13 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">No boards yet. Create your first board to get started!</p>
+            <p className="text-gray-500 mb-4">
+              No boards yet. Create your first board to get started!
+            </p>
             <CreateBoardModal />
           </div>
         )}
       </main>
     </div>
-  )
+  );
 }

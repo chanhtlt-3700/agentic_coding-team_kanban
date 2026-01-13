@@ -148,7 +148,7 @@ export async function POST(
       .single();
 
     const transformedMember = {
-      ...memberProfile,
+      ...(memberProfile as any),
       role: 'member',
       joined_at: new Date().toISOString(),
     };
